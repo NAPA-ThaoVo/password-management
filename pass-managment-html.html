@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Quản Lý Mật Khẩu Cá Nhân</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        dialog::backdrop {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        dialog[open] {
+            animation: zoomIn 0.2s ease-out;
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+<!-- PageDrop Unified FAB Widget -->
+<link rel="stylesheet" href="https://pagedrop.io/fab-widget.css?v=6">
+
+
+<!-- Like Prompt Popup (shown after 10s for Explore content) -->
+<div id="pagedrop-like-prompt">
+  <div id="pagedrop-like-prompt-content">
+    <button id="pagedrop-like-prompt-close" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div id="pagedrop-like-prompt-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+      </svg>
+    </div>
+    <p id="pagedrop-like-prompt-text">Enjoying this? A quick like helps keep it online longer.</p>
+  </div>
+  <div id="pagedrop-like-prompt-arrow"></div>
+</div>
+
+
+<!-- Expiration Warning Popup (only shown for content expiring soon) -->
+<div id="pagedrop-expiry-popup">
+  <div id="pagedrop-expiry-popup-content">
+    <div id="pagedrop-expiry-popup-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+    </div>
+    <h3 id="pagedrop-expiry-popup-title">Content Expiring Soon</h3>
+    <p id="pagedrop-expiry-popup-desc">
+      This content will be deleted in less than 24 hours. If you like it, you can extend its lifetime to keep it available.
+    </p>
+    <div id="pagedrop-expiry-popup-actions">
+      <button class="pagedrop-popup-btn pagedrop-popup-btn-secondary" id="pagedrop-expiry-dismiss">
+        Dismiss
+      </button>
+      <button class="pagedrop-popup-btn pagedrop-popup-btn-primary" id="pagedrop-expiry-extend">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Extend Lifetime
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="pagedrop-fab-container">
+  <!-- Expanded Panel (appears above pill on hover/click) -->
+  <div id="pagedrop-fab-expanded">
+    
+    <div class="pagedrop-fab-row">
+      <span class="pagedrop-fab-label"><span id="pagedrop-like-count-expanded">0</span> likes</span>
+      <button id="pagedrop-like-btn" class="pagedrop-fab-btn pagedrop-fab-btn-like">
+        <svg id="pagedrop-like-icon-btn" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+        </svg>
+        <span id="pagedrop-like-text">Like</span>
+      </button>
+    </div>
+    
+    <div class="pagedrop-fab-row pagedrop-fab-row-info">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagedrop-fab-row-icon">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span class="pagedrop-fab-label"><span id="pagedrop-view-count-expanded">11</span> views</span>
+    </div>
+    <div class="pagedrop-fab-row">
+      <span class="pagedrop-fab-label">13 days left</span>
+      <button id="pagedrop-extend-btn" class="pagedrop-fab-btn pagedrop-fab-btn-extend">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Extend
+      </button>
+    </div>
+    <div class="pagedrop-fab-cta">
+      Like what you see? <a href="https://pagedrop.io" target="_blank" rel="noopener">Create your own</a>
+    </div>
+    <div class="pagedrop-fab-report">
+      <a href="#" id="pagedrop-report-btn">Report this content</a>
+    </div>
+  </div>
+
+  <!-- Collapsed Pill (always visible) -->
+  <div id="pagedrop-fab-pill" class="">
+    <a href="https://pagedrop.io" target="_blank" rel="noopener" class="pagedrop-fab-logo" title="Hosted on PageDrop" onclick="event.stopPropagation();">
+      <img src="https://pagedrop.io/icon.png" alt="PageDrop" />
+    </a>
+    <div class="pagedrop-fab-divider"></div>
+    <div id="pagedrop-fab-views" class="pagedrop-fab-views" title="11 views">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span id="pagedrop-view-count-pill">11</span>
+    </div>
+    <div class="pagedrop-fab-divider"></div>
+    
+    <div class="pagedrop-fab-likes" id="pagedrop-likes-display">
+      <svg id="pagedrop-like-icon-pill" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+      </svg>
+      <span id="pagedrop-like-count-pill">0</span>
+    </div>
+    <div class="pagedrop-fab-divider"></div>
+    
+    <div class="pagedrop-fab-days ">
+      
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+      
+      <span>13d</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://pagedrop.io/fab-widget.js" data-slug="digital-roll-a7kt" data-base-url="https://pagedrop.io" data-is-explore="true" data-days-remaining="13" data-view-count="11" defer></script>
+
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-bold text-slate-800">
+                    PassGuard
+                </h1>
+                <p class="text-slate-500">Lưu trữ mật khẩu an toàn trên trình duyệt</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Thêm Tài Khoản
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Area -->
+        <div class="glass-card p-4 rounded-2xl shadow-sm mb-8 border border-slate-200">
+            <div class="relative w-full">
+                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="search" oninput="displayPasswords()" placeholder="Tìm kiếm trang web hoặc tên đăng nhập..." 
+                    class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-lg">
+            </div>
+        </div>
+
+        <!-- Password List -->
+        <div id="password-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <!-- Dữ liệu được chèn qua JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+            <i class="fas fa-key text-slate-200 text-6xl mb-4"></i>
+            <p class="text-slate-500 text-lg font-medium">Danh sách trống</p>
+            <p class="text-slate-400">Vui lòng thêm tài khoản để bắt đầu quản lý.</p>
+        </div>
+    </div>
+
+    <!-- Dialog Form (Modal) -->
+    <dialog id="form-dialog" class="glass-card rounded-2xl shadow-2xl p-0 w-full max-w-md overflow-hidden border border-slate-200">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="form-title" class="text-xl font-bold text-slate-800 text-left">Thêm Tài Khoản</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="password-form" class="space-y-4 text-left">
+                <input type="hidden" id="entry-id">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Tên Trang Web</label>
+                    <input type="text" id="website" required placeholder="Ví dụ: Facebook, Github..." 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Tên Đăng Nhập</label>
+                    <input type="text" id="username" required placeholder="Email hoặc Username"
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Mật Khẩu</label>
+                    <div class="relative">
+                        <input type="password" id="password" required placeholder="Nhập mật khẩu"
+                            class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono">
+                        <button type="button" onclick="togglePasswordVisibility('password')" class="absolute right-3 top-2.5 text-slate-400 hover:text-blue-500 transition">
+                            <i class="fas fa-eye" id="password-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-200 transition">
+                        Thoát
+                    </button>
+                    <button type="submit" id="submit-btn" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                        Lưu Dữ Liệu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <script>
+        // Quản lý trạng thái dữ liệu
+        let passwords = JSON.parse(localStorage.getItem('passwords')) || [];
+
+        const dialog = document.getElementById('form-dialog');
+        const form = document.getElementById('password-form');
+        const listContainer = document.getElementById('password-list');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('search');
+
+        // Điều khiển Modal
+        function openModal(isEdit = false) {
+            if (!isEdit) {
+                resetForm();
+                document.getElementById('form-title').innerText = "Thêm Tài Khoản Mới";
+            }
+            dialog.showModal();
+        }
+
+        function closeModal() {
+            dialog.close();
+            resetForm();
+        }
+
+        // Xử lý Gửi Form (Create & Update)
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('entry-id').value;
+            const website = document.getElementById('website').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (id) {
+                const index = passwords.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    passwords[index] = { ...passwords[index], website, username, password };
+                }
+            } else {
+                const newEntry = {
+                    id: Date.now().toString(),
+                    website,
+                    username,
+                    password,
+                    createdAt: new Date().toLocaleDateString('vi-VN')
+                };
+                passwords.push(newEntry);
+            }
+
+            saveAndRefresh();
+            closeModal();
+        });
+
+        // Hiển thị danh sách (Read & Search)
+        function displayPasswords() {
+            const term = searchInput.value.toLowerCase();
+            const filtered = passwords.filter(p => 
+                p.website.toLowerCase().includes(term) || 
+                p.username.toLowerCase().includes(term)
+            );
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            listContainer.innerHTML = filtered.map(p => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition group relative">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg">${p.website}</h3>
+                            <p class="text-sm text-slate-500">${p.username}</p>
+                        </div>
+                        <div class="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition">
+                            <button onclick="editEntry('${p.id}')" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Chỉnh sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteEntry('${p.id}')" class="p-2 text-slate-400 hover:text-red-600 transition" title="Xóa tài khoản">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl">
+                        <div class="flex-1 font-mono text-sm px-2 truncate">
+                            <span id="pass-text-${p.id}" class="text-slate-400 italic">••••••••</span>
+                            <input type="hidden" value="${p.password}" id="hidden-val-${p.id}">
+                        </div>
+                        <button onclick="toggleItemVisibility('${p.id}')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition">
+                            <i class="fas fa-eye" id="eye-icon-${p.id}"></i>
+                        </button>
+                        <button onclick="copyToClipboard('${p.id}')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-green-600 transition">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Chức năng Xóa (Delete)
+        function deleteEntry(id) {
+            const entry = passwords.find(p => p.id === id);
+            if (!entry) return;
+            
+            if (confirm("Bạn có chắc chắn muốn xóa tài khoản [" + entry.website + "] không?")) {
+                passwords = passwords.filter(p => p.id !== id);
+                saveAndRefresh();
+            }
+        }
+
+        // Chức năng Chỉnh sửa (Edit)
+        function editEntry(id) {
+            const entry = passwords.find(p => p.id === id);
+            if (!entry) return;
+
+            document.getElementById('entry-id').value = entry.id;
+            document.getElementById('website').value = entry.website;
+            document.getElementById('username').value = entry.username;
+            document.getElementById('password').value = entry.password;
+
+            document.getElementById('form-title').innerText = "Chỉnh Sửa Thông Tin";
+            document.getElementById('submit-btn').innerText = "Lưu Thay Đổi";
+            openModal(true);
+        }
+
+        // Lưu dữ liệu vào LocalStorage
+        function saveAndRefresh() {
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+            displayPasswords();
+        }
+
+        // Reset form
+        function resetForm() {
+            form.reset();
+            document.getElementById('entry-id').value = '';
+            document.getElementById('password').type = 'password';
+            document.getElementById('password-eye').className = 'fas fa-eye';
+            document.getElementById('submit-btn').innerText = "Lưu Dữ Liệu";
+        }
+
+        // Ẩn/Hiện mật khẩu trong form
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const eye = document.getElementById('password-eye');
+            if (input.type === "password") {
+                input.type = "text";
+                eye.className = 'fas fa-eye-slash';
+            } else {
+                input.type = "password";
+                eye.className = 'fas fa-eye';
+            }
+        }
+
+        // Ẩn/Hiện mật khẩu trong danh sách
+        function toggleItemVisibility(id) {
+            const span = document.getElementById("pass-text-" + id);
+            const val = document.getElementById("hidden-val-" + id).value;
+            const eye = document.getElementById("eye-icon-" + id);
+            
+            if (span.innerText === '••••••••') {
+                span.innerText = val;
+                span.classList.remove('text-slate-400', 'italic');
+                span.classList.add('text-slate-700');
+                eye.className = 'fas fa-eye-slash';
+            } else {
+                span.innerText = '••••••••';
+                span.classList.add('text-slate-400', 'italic');
+                span.classList.remove('text-slate-700');
+                eye.className = 'fas fa-eye';
+            }
+        }
+
+        // Copy mật khẩu bằng ID
+        function copyToClipboard(id) {
+            const val = document.getElementById("hidden-val-" + id).value;
+            const el = document.createElement('textarea');
+            el.value = val;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert("Đã sao chép mật khẩu thành công!");
+        }
+
+        // Khởi tạo
+        displayPasswords();
+    </script>
+</body>
+</html>
